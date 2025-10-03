@@ -14,7 +14,7 @@ pub fn celcius_to_fahrenheit(celcius: Float) -> Float {
   celcius *. 9.0 /. 5.0 +. 32.0
 }
 
-fn string_to_float(number: String) -> Result(Float, Nil) {
+pub fn string_to_float(number: String) -> Result(Float, Nil) {
   case int.parse(number) {
     Ok(i) -> Ok(int.to_float(i))
     Error(_) ->
@@ -25,20 +25,20 @@ fn string_to_float(number: String) -> Result(Float, Nil) {
   }
 }
 
-type Model {
+pub type Model {
   Model(fahrenheit: String, celcius: String)
 }
 
-type Msg {
+pub type Msg {
   UserChangedFarenheit(String)
   UserChangedCelcius(String)
 }
 
-fn init(_args) -> Model {
+pub fn init(_args) -> Model {
   Model(fahrenheit: "", celcius: "")
 }
 
-fn update(model: Model, msg: Msg) -> Model {
+pub fn update(model: Model, msg: Msg) -> Model {
   case msg {
     UserChangedFarenheit(value) -> {
       case string_to_float(value) {
@@ -66,7 +66,7 @@ fn update(model: Model, msg: Msg) -> Model {
   }
 }
 
-fn view(model: Model) -> Element(Msg) {
+pub fn view(model: Model) -> Element(Msg) {
   html.div(
     [
       attribute.class(

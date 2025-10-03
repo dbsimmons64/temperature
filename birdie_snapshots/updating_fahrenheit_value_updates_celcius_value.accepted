@@ -1,0 +1,27 @@
+---
+version: 1.4.1
+title: Updating fahrenheit value updates Celcius value
+file: ./test/temperature_test.gleam
+test_name: update_fahrenheit_updates_celcius_test
+---
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+  <div class="bg-white shadow-lg rounded-xl p-8 flex flex-col items-center w-80">
+    <h2 class="text-2xl font-medium mb-6">
+      Fahrenheit to Celsius
+    </h2>
+    <div class="w-full flex flex-col gap-4">
+      <div class="flex flex-col">
+        <label class="text-sm font-medium mb-1" for="fahrenheit">
+           Fahrenheit 
+        </label>
+        <input class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400" id="fahrenheit" placeholder="Enter °F" value="32.0">
+      </div>
+      <div class="flex flex-col">
+        <label class="text-sm font-medium mb-1" for="celsius">
+           Celsius 
+        </label>
+        <input class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400" id="celsius" placeholder="°C" type="text" value="0.0">
+      </div>
+    </div>
+  </div>
+</div>

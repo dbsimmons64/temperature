@@ -20,3 +20,4 @@ lustre = ">= 5.3.5 and < 6.0.0"
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"
 lustre_dev_tools = ">= 1.9.2 and < 2.0.0"
+birdie = ">= 1.4.1 and < 2.0.0"
