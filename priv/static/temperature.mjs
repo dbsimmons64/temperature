@@ -1867,6 +1867,16 @@ function identity2(x) {
   return x;
 }
 
+// build/dev/javascript/gleam_json/gleam_json_ffi.mjs
+function identity3(x) {
+  return x;
+}
+
+// build/dev/javascript/gleam_json/gleam/json.mjs
+function bool(input2) {
+  return identity3(input2);
+}
+
 // build/dev/javascript/lustre/lustre/internals/constants.ffi.mjs
 var document = () => globalThis?.document;
 var NAMESPACE_HTML = "http://www.w3.org/1999/xhtml";
@@ -2067,6 +2077,9 @@ function attribute(name, value2) {
   return new Attribute(attribute_kind, name, value2);
 }
 var property_kind = 1;
+function property(name, value2) {
+  return new Property(property_kind, name, value2);
+}
 var event_kind = 2;
 function event(name, handler, include, prevent_default, stop_propagation, immediate, debounce, throttle) {
   return new Event2(
@@ -2088,6 +2101,19 @@ var always_kind = 2;
 // build/dev/javascript/lustre/lustre/attribute.mjs
 function attribute2(name, value2) {
   return attribute(name, value2);
+}
+function property2(name, value2) {
+  return property(name, value2);
+}
+function boolean_attribute(name, value2) {
+  if (value2) {
+    return attribute2(name, "");
+  } else {
+    return property2(name, bool(false));
+  }
+}
+function autofocus(should_autofocus) {
+  return boolean_attribute("autofocus", should_autofocus);
 }
 function class$(name) {
   return attribute2("class", name);
@@ -4731,9 +4757,9 @@ function on(name, handler) {
     0
   );
 }
-function on_input(msg) {
+function on_change(msg) {
   return on(
-    "input",
+    "change",
     subfield(
       toList(["target", "value"]),
       string2,
@@ -4746,6 +4772,12 @@ function on_input(msg) {
 
 // build/dev/javascript/temperature/temperature.mjs
 var FILEPATH = "src/temperature.gleam";
+var TemperatureInvalidFormat = class extends CustomType {
+  constructor(input2) {
+    super();
+    this.input = input2;
+  }
+};
 var Model = class extends CustomType {
   constructor(fahrenheit, celcius) {
     super();
@@ -4781,12 +4813,12 @@ function string_to_float(number) {
     if ($1 instanceof Ok) {
       return $1;
     } else {
-      return new Error(void 0);
+      return new Error(new TemperatureInvalidFormat(number));
     }
   }
 }
 function init(_) {
-  return new Model("", "");
+  return new Model(new Ok(32), new Ok(0));
 }
 function update2(model, msg) {
   if (msg instanceof UserChangedFarenheit) {
@@ -4795,30 +4827,32 @@ function update2(model, msg) {
     if ($ instanceof Ok) {
       let fahrenheit = $[0];
       return new Model(
-        value2,
-        (() => {
-          let _pipe = fahrenheit_to_celcius(fahrenheit);
-          return float_to_string(_pipe);
-        })()
+        new Ok(fahrenheit),
+        new Ok(fahrenheit_to_celcius(fahrenheit))
       );
     } else {
-      return new Model(value2, model.celcius);
+      let error = $[0];
+      return new Model(new Error(error), model.celcius);
     }
   } else {
     let value2 = msg[0];
     let $ = string_to_float(value2);
     if ($ instanceof Ok) {
       let celcius = $[0];
-      return new Model(
-        (() => {
-          let _pipe = celcius_to_fahrenheit(celcius);
-          return float_to_string(_pipe);
-        })(),
-        value2
-      );
+      return new Model(new Ok(celcius_to_fahrenheit(celcius)), new Ok(celcius));
     } else {
-      return new Model(model.fahrenheit, value2);
+      let error = $[0];
+      return new Model(model.fahrenheit, new Error(error));
     }
+  }
+}
+function temperature_to_string(temperature) {
+  if (temperature instanceof Ok) {
+    let temperature$1 = temperature[0];
+    return float_to_string(temperature$1);
+  } else {
+    let error = temperature[0];
+    return error.input;
   }
 }
 function view(model) {
@@ -4860,8 +4894,9 @@ function view(model) {
                         "border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
                       ),
                       id("fahrenheit"),
-                      value(model.fahrenheit),
-                      on_input(
+                      value(temperature_to_string(model.fahrenheit)),
+                      autofocus(true),
+                      on_change(
                         (var0) => {
                           return new UserChangedFarenheit(var0);
                         }
@@ -4888,8 +4923,8 @@ function view(model) {
                       ),
                       type_("text"),
                       id("celsius"),
-                      value(model.celcius),
-                      on_input(
+                      value(temperature_to_string(model.celcius)),
+                      on_change(
                         (var0) => {
                           return new UserChangedCelcius(var0);
                         }
@@ -4913,15 +4948,15 @@ function main() {
       "let_assert",
       FILEPATH,
       "temperature",
-      134,
+      149,
       "main",
       "Pattern match failed, no pattern matched the value.",
       {
         value: $,
-        start: 3606,
-        end: 3655,
-        pattern_start: 3617,
-        pattern_end: 3622
+        start: 4108,
+        end: 4157,
+        pattern_start: 4119,
+        pattern_end: 4124
       }
     );
   }

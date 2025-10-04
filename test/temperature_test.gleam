@@ -23,37 +23,40 @@ pub fn float_to_string_valid_int_test() {
 
 pub fn float_to_string_invalid_float_test() {
   temperature.string_to_float("12.0b")
-  |> should.equal(Error(Nil))
+  |> should.equal(Error(temperature.TemperatureInvalidFormat("12.0b")))
 }
 
-pub fn init_sets_defaults_to_space_test() {
+pub fn init_sets_defaults_test() {
   temperature.init(Nil)
-  |> should.equal(temperature.Model(fahrenheit: "", celcius: ""))
+  |> should.equal(temperature.Model(fahrenheit: Ok(32.0), celcius: Ok(0.0)))
 }
 
 pub fn user_changed_fahrenheit_test() {
-  let model = temperature.Model(fahrenheit: "", celcius: "")
+  let model = temperature.Model(fahrenheit: Ok(0.0), celcius: Ok(32.0))
 
   temperature.update(model, temperature.UserChangedFarenheit("32.0"))
-  |> should.equal(temperature.Model(fahrenheit: "32.0", celcius: "0.0"))
+  |> should.equal(temperature.Model(fahrenheit: Ok(32.0), celcius: Ok(0.0)))
 }
 
 pub fn user_changed_celcius_test() {
-  let model = temperature.Model(fahrenheit: "", celcius: "")
+  let model = temperature.Model(fahrenheit: Ok(0.0), celcius: Ok(32.0))
 
   temperature.update(model, temperature.UserChangedCelcius("32.0"))
-  |> should.equal(temperature.Model(fahrenheit: "89.6", celcius: "32.0"))
+  |> should.equal(temperature.Model(fahrenheit: Ok(89.6), celcius: Ok(32.0)))
 }
 
 pub fn invalid_fahrenheit_does_not_change_celcius_value_test() {
-  let model = temperature.Model(fahrenheit: "", celcius: "12.3")
+  let model = temperature.Model(fahrenheit: Ok(0.0), celcius: Ok(32.0))
 
   temperature.update(model, temperature.UserChangedFarenheit("32.0ab"))
-  |> should.equal(temperature.Model(fahrenheit: "32.0ab", celcius: "12.3"))
+  |> should.equal(temperature.Model(
+    fahrenheit: Error(temperature.TemperatureInvalidFormat("32.0ab")),
+    celcius: Ok(32.0),
+  ))
 }
 
 pub fn update_fahrenheit_updates_celcius_test() {
-  let model = temperature.Model(fahrenheit: "", celcius: "")
+  let model = temperature.Model(fahrenheit: Ok(0.0), celcius: Ok(32.0))
 
   temperature.update(model, temperature.UserChangedFarenheit("32.0"))
   |> temperature.view()

@@ -14,19 +14,26 @@ pub fn celcius_to_fahrenheit(celcius: Float) -> Float {
   celcius *. 9.0 /. 5.0 +. 32.0
 }
 
-pub fn string_to_float(number: String) -> Result(Float, Nil) {
+pub fn string_to_float(number: String) -> Result(Float, TemperatureError) {
   case int.parse(number) {
     Ok(i) -> Ok(int.to_float(i))
     Error(_) ->
       case float.parse(number) {
         Ok(i) -> Ok(i)
-        Error(_) -> Error(Nil)
+        Error(_) -> Error(TemperatureInvalidFormat(number))
       }
   }
 }
 
+pub type TemperatureError {
+  TemperatureInvalidFormat(input: String)
+}
+
 pub type Model {
-  Model(fahrenheit: String, celcius: String)
+  Model(
+    fahrenheit: Result(Float, TemperatureError),
+    celcius: Result(Float, TemperatureError),
+  )
 }
 
 pub type Msg {
@@ -35,7 +42,7 @@ pub type Msg {
 }
 
 pub fn init(_args) -> Model {
-  Model(fahrenheit: "", celcius: "")
+  Model(fahrenheit: Ok(32.0), celcius: Ok(0.0))
 }
 
 pub fn update(model: Model, msg: Msg) -> Model {
@@ -44,11 +51,11 @@ pub fn update(model: Model, msg: Msg) -> Model {
       case string_to_float(value) {
         Ok(fahrenheit) -> {
           Model(
-            fahrenheit: value,
-            celcius: fahrenheit_to_celcius(fahrenheit) |> float.to_string(),
+            fahrenheit: Ok(fahrenheit),
+            celcius: Ok(fahrenheit_to_celcius(fahrenheit)),
           )
         }
-        Error(_) -> Model(..model, fahrenheit: value)
+        Error(error) -> Model(..model, fahrenheit: Error(error))
       }
     }
 
@@ -56,13 +63,20 @@ pub fn update(model: Model, msg: Msg) -> Model {
       case string_to_float(value) {
         Ok(celcius) -> {
           Model(
-            celcius: value,
-            fahrenheit: celcius_to_fahrenheit(celcius) |> float.to_string(),
+            celcius: Ok(celcius),
+            fahrenheit: Ok(celcius_to_fahrenheit(celcius)),
           )
         }
-        Error(_) -> Model(..model, celcius: value)
+        Error(error) -> Model(..model, celcius: Error(error))
       }
     }
+  }
+}
+
+fn temperature_to_string(temperature: Result(Float, TemperatureError)) -> String {
+  case temperature {
+    Ok(temperature) -> float.to_string(temperature)
+    Error(error) -> error.input
   }
 }
 
@@ -99,8 +113,9 @@ pub fn view(model: Model) -> Element(Msg) {
                   "border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400",
                 ),
                 attribute.id("fahrenheit"),
-                attribute.value(model.fahrenheit),
-                event.on_input(UserChangedFarenheit),
+                attribute.value(temperature_to_string(model.fahrenheit)),
+                attribute.autofocus(True),
+                event.on_change(UserChangedFarenheit),
               ]),
             ]),
             html.div([attribute.class("flex flex-col")], [
@@ -118,8 +133,8 @@ pub fn view(model: Model) -> Element(Msg) {
                 ),
                 attribute.type_("text"),
                 attribute.id("celsius"),
-                attribute.value(model.celcius),
-                event.on_input(UserChangedCelcius),
+                attribute.value(temperature_to_string(model.celcius)),
+                event.on_change(UserChangedCelcius),
               ]),
             ]),
           ]),

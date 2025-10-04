@@ -14,7 +14,7 @@ test_name: update_fahrenheit_updates_celcius_test
         <label class="text-sm font-medium mb-1" for="fahrenheit">
            Fahrenheit 
         </label>
-        <input class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400" id="fahrenheit" placeholder="Enter °F" value="32.0">
+        <input autofocus class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400" id="fahrenheit" placeholder="Enter °F" value="32.0">
       </div>
       <div class="flex flex-col">
         <label class="text-sm font-medium mb-1" for="celsius">
